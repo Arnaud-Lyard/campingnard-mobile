@@ -1,56 +1,101 @@
-# Welcome to your Expo app 👋
+# Campingnard — application mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**L'application du campeur connecté**, en version mobile : météo, checklist de voyage, outils de
+terrain (boussole, niveau, altimètre) et suivi de batterie, dans votre poche.
 
-## Get started
+Application [Expo](https://expo.dev) / React Native qui consomme l'API JSON de l'
+[application web Campingnard](../campingnard-app) (Symfony), avec authentification par compte
+partagé entre le web et le mobile.
 
-1. Install dependencies
+<p align="center">
+  <img src="docs/screenshot-meteo.jpg" alt="Écran météo" width="220">
+  <img src="docs/screenshot-checklist.jpg" alt="Écran checklist" width="220">
+  <img src="docs/screenshot-spiritlevel.jpg" alt="Écran niveau à bulle" width="220">
+</p>
+<p align="center">
+  <img src="docs/screenshot-login.jpg" alt="Écran de connexion" width="220">
+  <img src="docs/screenshot-settings.jpg" alt="Écran paramètres" width="220">
+</p>
+
+## Fonctionnalités
+
+Toute l'application est protégée par connexion (compte commun avec le site web).
+
+- **Équipements (checklist)** — parité complète avec le site web : création, génération à partir
+  de préréglages, statut par article, actions groupées, réorganisation, filtres, édition.
+- **Outils** :
+  - **Météo** — pression + tendance 3 h et prévisions à 3 jours ([Open-Meteo](https://open-meteo.dev),
+    nécessite une connexion).
+  - **Soleil & Lune** — lever/coucher, midi solaire, golden hour, phase lunaire, calculés
+    localement (hors ligne).
+  - **Altimètre** — altitude GPS.
+  - **Boussole** — cap magnétique (capteur magnétomètre).
+  - **Niveau à bulle** — niveau deux axes (accéléromètre + retour haptique).
+- **Entretien** — rappel de recharge de batterie (activation + fréquence en jours).
+- **Paramètres** — langue (FR/EN, détection automatique de la langue de l'appareil).
+
+## Stack technique
+
+- **Expo** SDK 56 + **Expo Router** (routing par fichiers)
+- **React Native** 0.85, **React** 19
+- **UI** : react-native-paper (`BottomNavigation` à 4 onglets)
+- **Auth** : JWT (LexikJWTAuthenticationBundle côté backend), stocké via `expo-secure-store`,
+  rafraîchi automatiquement sur 401 (`src/auth/auth-context.tsx`)
+- **Capteurs** : `expo-sensors` (accéléromètre, magnétomètre), `expo-location`, `expo-haptics`
+- **i18n** : i18next / react-i18next (FR/EN)
+- **Backend** : API Symfony du [projet web](../campingnard-app) (`src/Http/Api/Controller/`)
+
+## Démarrage
+
+1. Installer les dépendances :
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Lancer l'app :
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   Puis choisir une cible dans la sortie de la commande : development build, émulateur
+   Android, simulateur iOS, [Expo Go](https://expo.dev/go), ou navigateur web
+   (`npx expo start --web`).
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+3. Configurer l'URL de l'API backend si besoin — voir `src/constants/config.ts`
+   (variable `EXPO_PUBLIC_API_URL`).
+   ⚠️ Le backend tourne derrière FrankenPHP/Caddy : le certificat HTTPS local n'étant pas
+   fiable pour React Native, pointer en HTTP (`http://localhost`, émulateur Android
+   `http://10.0.2.2`, appareil physique `http://<IP-LAN>`).
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Architecture
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+src/
+  app/                # Routes Expo Router (login, register, forgot-password, index)
+  auth/                # AuthProvider / useAuth — session JWT
+  api/                 # Client API (login, register, forgotPassword, refresh, apiFetch)
+  components/          # main-tabs.tsx (BottomNavigation à 4 onglets)
+  features/            # Écrans par onglet : checklist, tools, maintenance, settings
+  i18n/                # Traductions FR/EN
+  constants/           # Config (API_BASE_URL, …)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Tous les identifiants de code (dossiers, clés de route/onglet, clés i18n) sont en anglais ;
+seules les valeurs de traduction affichées à l'utilisateur sont en français.
 
-### Other setup steps
+## Scripts
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| Script            | Effet                          |
+| ------------------ | ------------------------------- |
+| `npm run start`    | `expo start`                    |
+| `npm run android`  | `expo start --android`          |
+| `npm run ios`      | `expo start --ios`              |
+| `npm run web`      | `expo start --web`              |
+| `npm run lint`     | `expo lint`                     |
 
-## Learn more
+## En savoir plus
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Documentation Expo](https://docs.expo.dev/)
+- [Expo Router](https://docs.expo.dev/router/introduction)

@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Share, StyleSheet, View } from 'react-native';
 import { GestureDetector, type PanGesture } from 'react-native-gesture-handler';
 import {
   ActivityIndicator,
@@ -220,6 +220,18 @@ export default function ChecklistScreen() {
     }
   };
 
+  const shareChecklist = async () => {
+    const lines = eq.items.map(
+      (item) => `${item.status === 'complete' ? '☑' : '☐'} ${item.name}`,
+    );
+    const message = `${t('checklist.title')} (${progress.complete}/${progress.total})\n\n${lines.join('\n')}`;
+    try {
+      await Share.share({ message });
+    } catch {
+      /* user cancelled or share sheet failed; nothing to recover */
+    }
+  };
+
   const submitDialog = async () => {
     if (!dialog) return;
     const name = dialog.name.trim();
@@ -279,6 +291,12 @@ export default function ChecklistScreen() {
     <SafeAreaView style={styles.container} edges={[]}>
       <Appbar.Header>
         <Appbar.Content title={t('checklist.title')} />
+        <Appbar.Action
+          icon="share-variant"
+          disabled={eq.items.length === 0}
+          onPress={shareChecklist}
+          accessibilityLabel={t('checklist.share')}
+        />
       </Appbar.Header>
 
       {eq.items.length > 0 ? (

@@ -75,6 +75,7 @@
     "title": "Checklist",
     "create": "Créer",
     "generate": "Générer une liste",
+    "share": "Partager",
     "selectAll": "Tout sélectionner",
     "deselectAll": "Tout désélectionner",
     "status": { "inProgress": "En cours", "complete": "Terminé" },
